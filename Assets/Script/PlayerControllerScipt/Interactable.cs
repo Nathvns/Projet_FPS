@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,8 @@ public class Interactable : MonoBehaviour
 {
 //[SerializeField] private List<string> InteractableType = new List<string>() { "crate", "door"};
 [SerializeField] private string InteractableType;
+public static event Action DoorOpen;
+
  public void Interact(){
     Debug.Log("l'objet a été interacté");
 
@@ -37,6 +40,6 @@ private void CrateInteract(){
 }
 private void ButtonInteract(){
     Debug.Log("Interaction: button");
-
+    DoorOpen?.Invoke();
 }
 }
