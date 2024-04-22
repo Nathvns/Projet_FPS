@@ -5,41 +5,52 @@ using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
-//[SerializeField] private List<string> InteractableType = new List<string>() { "crate", "door"};
-[SerializeField] private string InteractableType;
-public static event Action DoorOpen;
+    // Définition du type d'objet interactable
+    [SerializeField] private string InteractableType;
 
- public void Interact(){
-    Debug.Log("l'objet a été interacté");
+    // Déclaration de l'événement DoorOpen
+    public static event Action DoorOpen;
 
-    switch (InteractableType)
+    // Méthode pour interagir avec l'objet
+    public void Interact()
     {
-        case "crate":
-        CrateInteract();
-        break;
-        case "door" :
-        DoorInteract();
-        break;
-        case "button" :
-        ButtonInteract();
-        break;
+        Debug.Log("l'objet a été interacté");
+
+        // Selon le type d'objet interactable, on appelle la méthode correspondante
+        switch (InteractableType)
+        {
+            case "crate":
+                CrateInteract();
+                break;
+            case "door" :
+                DoorInteract();
+                break;
+            case "button" :
+                ButtonInteract();
+                break;
+        }
     }
-}
 
-
-private void DoorInteract(){
-    Debug.Log("Interaction: Door");
-    bool isDoorOpen = transform.eulerAngles.y == 270;
+    // Méthode pour interagir avec une porte
+    private void DoorInteract()
+    {
+        Debug.Log("Interaction: Door");
+        bool isDoorOpen = transform.eulerAngles.y == 270;
         Vector3 rotationVector = transform.eulerAngles;
         rotationVector.y = isDoorOpen ? 0 : 270;
         transform.eulerAngles = rotationVector;
-}
-private void CrateInteract(){
-    Debug.Log("Interaction: Crate");
+    }
 
-}
-private void ButtonInteract(){
-    Debug.Log("Interaction: button");
-    DoorOpen?.Invoke();
-}
+    // Méthode pour interagir avec une caisse
+    private void CrateInteract()
+    {
+        Debug.Log("Interaction: Crate");
+    }
+
+    // Méthode pour interagir avec un bouton
+    private void ButtonInteract()
+    {
+        Debug.Log("Interaction: button");
+        DoorOpen?.Invoke();
+    }
 }

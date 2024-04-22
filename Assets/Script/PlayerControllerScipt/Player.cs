@@ -1,56 +1,58 @@
-
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.VisualScripting;
 
-
-
 public class Player : MonoBehaviour
 {
+   // Définition des variables pour la caméra, la vitesse de déplacement, la masse, l'accélération, la sensibilité de la souris et l'objet interactable
    [SerializeField] Transform cameraTransform;
    [SerializeField] float movementSpeed = 5f;
-
    [SerializeField] float mass = 1f;
    [SerializeField] float acceleration = 20f;
    [SerializeField] float mouseSensitivity = 3f;
    [SerializeField] private Interactable interactableTarget;
-    public bool IsGrounded => controller.isGrounded;
-    public event Action OnBeforeMove;
-    public event Action<bool> OnGroundStateChange;
    internal float movementSpeedMultiplier;
-    public CharacterController controller;
+
+
+   // Définition des événements pour le mouvement et le changement d'état du sol
+   public event Action OnBeforeMove;
+   public event Action<bool> OnGroundStateChange;
+   public bool IsGrounded => controller.isGrounded;
+
+
+   // Définition des variables pour le contrôleur de personnage, la vitesse, le regard et l'état du sol
+   public CharacterController controller;
    internal Vector3 velocity;
    Vector2 look;
    bool wasGrounded;
 
+   // Définition des actions pour le mouvement, le regard, le sprint et l'utilisation
    PlayerInput playerInput;
    InputAction moveAction;
    InputAction lookAction;
    InputAction sprintAction;
    InputAction useAction;
 
-
-
     void Start()
     {
+        // Verrouillage du curseur au démarrage
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Awake()
     {
+        // Initialisation des actions et du contrôleur de personnage
         controller = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
         moveAction = playerInput.actions["move"];
         lookAction = playerInput.actions["look"];
         sprintAction = playerInput.actions["sprint"];
         useAction = playerInput.actions["use"];
-
-
-
     }
     void Update()
     {
+       // Mise à jour de l'état du sol, du mouvement, du regard, de la gravité et de l'interaction
        UpdateGround();
        UpdateMovement();
        UpdateLook();
@@ -61,6 +63,7 @@ public class Player : MonoBehaviour
 
     void UpdateGround()
     {
+        // Vérification du changement d'état du sol
         if (wasGrounded != IsGrounded)
         {
             OnGroundStateChange?.Invoke(IsGrounded);
@@ -69,31 +72,33 @@ public class Player : MonoBehaviour
     }
     Vector3 GetMovementInput()
     {
-        var moveInput = moveAction.ReadValue<Vector2>();
+        // Obtention de l'entrée de mouvement et de sprint
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
 
-        var input = new Vector3();
+        Vector3 input = new Vector3();
         input += transform.forward * moveInput.y;
         input += transform.right * moveInput.x;
         input = Vector3.ClampMagnitude(input, 1f);
-        var sprintInput = sprintAction.ReadValue<float>();
-        var multiplier = sprintInput > 0 ? 1.5f : 1f;
+        float sprintInput = sprintAction.ReadValue<float>();
+        float multiplier = sprintInput > 0 ? 1.5f : 1f;
         input *= movementSpeed * movementSpeedMultiplier;
         return input;
     }
     void UpdateMovement(){
+        // Mise à jour du mouvement du personnage
         movementSpeedMultiplier = 1f;
         OnBeforeMove?.Invoke();
-        var input = GetMovementInput();
+        Vector3 input = GetMovementInput();
       
-        var factor = acceleration * Time.deltaTime;
+        float factor = acceleration * Time.deltaTime;
         velocity.x = Mathf.Lerp(velocity.x, input.x, factor);
         velocity.z = Mathf.Lerp(velocity.z, input.z, factor);
 
-        //transform.Translate(input * movementSpeed * Time.deltaTime, Space.World);
         controller.Move(velocity * Time.deltaTime);
     }
     void UpdateLook(){
-        var lookInput = lookAction.ReadValue<Vector2>();
+        // Mise à jour du regard du personnage
+        Vector2 lookInput = lookAction.ReadValue<Vector2>();
         look.x += lookInput.x * mouseSensitivity;
         look.y += lookInput.y * mouseSensitivity;
 
@@ -103,20 +108,16 @@ public class Player : MonoBehaviour
         transform.localRotation = Quaternion.Euler(0, look.x, 0);        
     }
 void UpdateGravity(){
-    var gravity = Physics.gravity * mass * Time.deltaTime;
+    // Mise à jour de la gravité du personnage
+    Vector3 gravity = Physics.gravity * mass * Time.deltaTime;
     velocity.y = controller.isGrounded ? -1f : velocity.y + gravity.y;
-
-
-
 }
 
 void InteractionHandler(){
+    // Gestion des interactions avec les objets
     Vector3 playerOrientation = cameraTransform.forward;
 
     if(Physics.Raycast(transform.position, playerOrientation, out RaycastHit hitObj, 5f, LayerMask.GetMask("Usables"))){
-
-        
-
         if(hitObj.transform.TryGetComponent<Interactable>(out Interactable interactableObj)){
             interactableTarget = interactableObj;
         }
@@ -126,12 +127,10 @@ void InteractionHandler(){
 }
 
 void UseInputHandler (){
-    var useInput = useAction.ReadValue<float>();
+    // Gestion de l'entrée d'utilisation
+    float useInput = useAction.ReadValue<float>();
     if (useInput == 0) return;
     Debug.Log("coucou");
     interactableTarget?.Interact();
 
-
-}
-
-}
+}}

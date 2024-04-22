@@ -44,7 +44,7 @@ void OnDisable()
 }*/
 void OnBeforeMove()
 {
-    var jumpInput = jumpAction.ReadValue<float>();
+    float jumpInput = jumpAction.ReadValue<float>();
     if (jumpInput == 0) return;
     lastJumpPressTime = Time.time;
 
