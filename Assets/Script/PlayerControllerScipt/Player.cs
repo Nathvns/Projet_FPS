@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.VisualScripting;
 
 public class Player : MonoBehaviour
 {
@@ -13,7 +12,8 @@ public class Player : MonoBehaviour
    [SerializeField] float mouseSensitivity = 3f;
    [SerializeField] private Interactable interactableTarget;
    internal float movementSpeedMultiplier;
-
+   public Sword sword;
+   public Slime_Mob slimeMob;
 
    // Définition des événements pour le mouvement et le changement d'état du sol
    public event Action OnBeforeMove;
@@ -33,6 +33,8 @@ public class Player : MonoBehaviour
    InputAction lookAction;
    InputAction sprintAction;
    InputAction useAction;
+   InputAction attackAction;
+
 
     void Start()
     {
@@ -49,17 +51,47 @@ public class Player : MonoBehaviour
         lookAction = playerInput.actions["look"];
         sprintAction = playerInput.actions["sprint"];
         useAction = playerInput.actions["use"];
+        attackAction = playerInput.actions["attack"];
+        
     }
     void Update()
+{
+    // Mise à jour de l'état du sol, du mouvement, du regard, de la gravité et de l'interaction
+    UpdateGround();
+    UpdateMovement();
+    UpdateLook();
+    UpdateGravity();
+    InteractionHandler();
+    UseInputHandler();
+
+    // Reset all animations
+    sword.Running_Sword(false);
+    sword.Walking_Sword(false);
+    sword.Attack_Sword(false);
+
+    // Check if the player is sprinting
+    if (sprintAction.ReadValue<float>() > 0)
     {
-       // Mise à jour de l'état du sol, du mouvement, du regard, de la gravité et de l'interaction
-       UpdateGround();
-       UpdateMovement();
-       UpdateLook();
-       UpdateGravity();
-       InteractionHandler();
-       UseInputHandler();
+        sword.Running_Sword(true);
     }
+    // Check if the player is moving
+    else if (moveAction.ReadValue<Vector2>().magnitude > 0)
+    {
+        sword.Walking_Sword(true);
+    }
+
+    float attackInput = attackAction.ReadValue<float>();
+if (attackInput > 0)
+{
+    sword.Attack_Sword(true);
+}
+else
+{
+    sword.Attack_Sword(false);
+}
+}
+
+
 
     void UpdateGround()
     {
@@ -96,6 +128,11 @@ public class Player : MonoBehaviour
 
         controller.Move(velocity * Time.deltaTime);
     }
+    void AttackHandler(){
+        bool attackInput = attackAction.ReadValue<bool>();
+        sword.Attack_Sword(!attackInput);
+        slimeMob.Attacked();}
+
     void UpdateLook(){
         // Mise à jour du regard du personnage
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
@@ -114,7 +151,6 @@ void UpdateGravity(){
 }
 
 void InteractionHandler(){
-    // Gestion des interactions avec les objets
     Vector3 playerOrientation = cameraTransform.forward;
 
     if(Physics.Raycast(transform.position, playerOrientation, out RaycastHit hitObj, 5f, LayerMask.GetMask("Usables"))){
