@@ -17,8 +17,11 @@ public class Sword : MonoBehaviour
         swordAnimator.SetBool("is_Walking", isWalking);
     }
 
-    public void Attack_Sword(bool isAttacking)
+    public void Attack_Sword()
     {
-        swordAnimator.SetBool("attack", isAttacking);
+        Debug.Log(swordAnimator.GetBool("attack"));
+        if (swordAnimator.GetBool("attack") == false){
+            swordAnimator.SetBool("attack", true);
+        }
     }
 }

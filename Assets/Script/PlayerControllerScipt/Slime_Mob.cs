@@ -20,9 +20,9 @@ public class Slime_Mob : MonoBehaviour
     {
         if(actualMobHp <= 0){Destroy(gameObject);}
     }
-    public void Attacked()
+ public void Attacked()
 {
     actualMobHp -= 50; 
-    Debug.Log(actualMobHp);
+    Debug.Log("Mob HP after being attacked: " + actualMobHp);
 }
 }

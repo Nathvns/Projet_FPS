@@ -10,6 +10,8 @@ public class Player : MonoBehaviour
    [SerializeField] float mass = 1f;
    [SerializeField] float acceleration = 20f;
    [SerializeField] float mouseSensitivity = 3f;
+   [SerializeField] float attackRange = 3f;
+
    [SerializeField] private Interactable interactableTarget;
    internal float movementSpeedMultiplier;
    public Sword sword;
@@ -63,11 +65,10 @@ public class Player : MonoBehaviour
     UpdateGravity();
     InteractionHandler();
     UseInputHandler();
-
+    AttackHandler();
     // Reset all animations
     sword.Running_Sword(false);
     sword.Walking_Sword(false);
-    sword.Attack_Sword(false);
 
     // Check if the player is sprinting
     if (sprintAction.ReadValue<float>() > 0)
@@ -83,11 +84,7 @@ public class Player : MonoBehaviour
     float attackInput = attackAction.ReadValue<float>();
 if (attackInput > 0)
 {
-    sword.Attack_Sword(true);
-}
-else
-{
-    sword.Attack_Sword(false);
+    sword.Attack_Sword();
 }
 }
 
@@ -129,9 +126,20 @@ else
         controller.Move(velocity * Time.deltaTime);
     }
     void AttackHandler(){
-        bool attackInput = attackAction.ReadValue<bool>();
-        sword.Attack_Sword(!attackInput);
-        slimeMob.Attacked();}
+    float attackInput = attackAction.ReadValue<float>();
+    //sword.Attack_Sword(!attackInput);
+    if(attackInput > 0){
+    // Use a rayzast to determine which mob the player is attacking
+    RaycastHit hit;
+    if (Physics.Raycast(transform.position, transform.forward, out hit, attackRange)) {
+        Slime_Mob mob = hit.transform.GetComponent<Slime_Mob>();
+        if (mob != null) {
+            Debug.Log("attack!");
+            // If the player is attacking a mob, call the Attacked method on that mob
+            mob.Attacked();
+        }
+    }}
+}
 
     void UpdateLook(){
         // Mise à jour du regard du personnage
